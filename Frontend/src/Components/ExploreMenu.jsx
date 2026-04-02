@@ -1,8 +1,15 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import Title from './Title'
-import {menu_list} from '../assets/assets'
+import { foodContext } from '../Context/foodContext'
 
 export const ExploreMenu = () => {
+  const { menuList, navigate, setSelectedCategory } = useContext(foodContext)
+
+  const handleCategoryClick = (category) => {
+    setSelectedCategory(category)
+    navigate('/menu', { state: { selectedCategory: category } })
+  }
+
   return (
     <div>
       <div className='text-center sm:text-left text-2xl sm:text-3xl py-6 sm:py-8'>
@@ -11,11 +18,16 @@ export const ExploreMenu = () => {
       </div>
 
       <div className='grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4 gap-y-5 sm:gap-y-6'>
-        {menu_list.map((item, index) => (
-          <div key={index} className='rounded-lg p-2 sm:p-4 hover:shadow-lg transition-shadow duration-300'>
+        {menuList.map((item, index) => (
+          <button
+            key={index}
+            type='button'
+            onClick={() => handleCategoryClick(item.menu_name)}
+            className='rounded-lg p-2 sm:p-4 hover:shadow-lg transition-shadow duration-300 text-left cursor-pointer'
+          >
             <img src={item.menu_image} alt="" className='w-full h-auto rounded-lg' />
             <h3 className='text-xs sm:text-lg text-center font-semibold mt-2'>{item.menu_name}</h3>
-          </div>
+          </button>
         ))}
          <hr className='border-t border-gray-300 col-span-full' />
       </div>

@@ -14,6 +14,7 @@ export const TopDishes = () => {
         {food_list.slice(0, 8).map((item, index) => (
           <FoodItem
             key={index}
+            item={item}
             image={item.image}
             name={item.name}
             description={item.description}

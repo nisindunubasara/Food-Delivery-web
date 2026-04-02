@@ -1,5 +1,6 @@
 import React from 'react'
 import {assets} from '../assets/assets'
+import { Link } from 'react-router-dom'
 
 export const Hero = () => {
   return (
@@ -19,9 +20,11 @@ export const Hero = () => {
             experience, one delicious meal at a time.
           </p>
 
-          <button className='mt-6 bg-white text-gray-700 px-6 py-3 rounded-full text-sm md:text-base hidden sm:inline-block'>
-            View Menu
-          </button>
+          <Link to='/menu'>
+            <button className='mt-6 bg-white text-gray-700 px-6 py-3 rounded-full text-sm md:text-base hidden sm:inline-block cursor-pointer'>
+              View Menu
+            </button>
+          </Link>
         </div>
       </div>
 

@@ -1,55 +1,137 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import {assets} from '../assets/assets'
-import { NavLink } from 'react-router-dom'
-import { useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
+import { Link, NavLink } from 'react-router-dom'
+import { assets } from '../assets/assets'
+import { foodContext } from '../Context/foodContext'
+import { Show, SignInButton, UserButton, useUser } from "@clerk/react";
 
 const Navbar = () => {
-
+  const { cartItems, orderItems } = useContext(foodContext)
+  const { isSignedIn } = useUser()
   const [visible, setVisible] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const searchRef = useRef(null)
+  const searchInputRef = useRef(null)
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setSearchOpen(false)
+      }
+    }
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        setSearchOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleOutsideClick)
+    document.addEventListener('keydown', handleEscape)
+
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (searchOpen) {
+      searchInputRef.current?.focus()
+    }
+  }, [searchOpen])
 
   return (
     <div className='flex items-center justify-between py-5 font-medium'>
 
       <Link to='/'>
-        <img src={assets.logo} alt="" className='w-36'/>
+        <img src={assets.logo} alt="" className='w-36' />
       </Link>
 
       <ul className='hidden sm:flex gap-5 text-sm text-gray-700'>
-
         <NavLink className='flex flex-col items-center gap-1' to='/'>
           <p>Home</p>
-          <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden'/>
+          <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
         </NavLink>
+
         <NavLink className='flex flex-col items-center gap-1' to='/menu'>
           <p>Menu</p>
-          <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden'/>
+          <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
         </NavLink>
+
         <NavLink className='flex flex-col items-center gap-1' to='/mobile'>
           <p>Mobile Menu</p>
-          <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden'/>
+          <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
         </NavLink>
+
         <NavLink className='flex flex-col items-center gap-1' to='/contact'>
           <p>Contact Us</p>
-          <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden'/>
+          <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
         </NavLink>
+
+        {orderItems.length > 0 && (
+          <NavLink className='flex flex-col items-center gap-1' to='/order'>
+            <p>My Orders</p>
+            <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
+          </NavLink>
+        )}
       </ul>
 
       <div className='flex items-center gap-2 sm:gap-6'>
+        <div ref={searchRef} className='relative flex h-5 w-5 items-center justify-center overflow-visible'>
+          <button
+            type='button'
+            onClick={() => setSearchOpen((open) => !open)}
+            className='flex items-center justify-center'
+            aria-label='Toggle search'
+            aria-expanded={searchOpen}
+          >
+            {!searchOpen && <img src={assets.search_icon} className='w-5 cursor-pointer' alt='' />}
+          </button>
 
-        <img src={assets.search_icon} className='w-5 cursor-pointer' alt="" />
+          {searchOpen && (
+            <input
+              ref={searchInputRef}
+              type='text'
+              placeholder='Search'
+              className='absolute right-0 top-1/2 h-9 w-56 -translate-y-1/2 rounded-full border border-gray-200 bg-white px-4 text-sm text-gray-700 shadow-sm outline-none placeholder:text-gray-400 focus:border-[#FF5A1F]'
+            />
+          )}
+        </div>
 
-        <Link to='/cart' className='relative'>
-           <img src={assets.basket_icon} className='w-5 min-w-5 hidden sm:block' alt="" />
-         </Link>
+        {isSignedIn && (
+          <Link to='/cart' className='relative'>
+            <img src={assets.basket_icon} className='w-5 min-w-5 hidden sm:block' alt="" />
+            {cartItems.length > 0 && (
+              <span className='absolute -top-2 -right-2 bg-[#FF5A1F] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center'>
+                {cartItems.length}
+              </span>
+            )}
+          </Link>
+        )}
 
-         <button className='border border-[#FF5A1F] text-black px-5 py-2 sm:px-7 sm:py-2 rounded-full text-xs sm:text-sm cursor-pointer hidden sm:block'>sign in</button>
+        <Show when="signed-out">
+          <SignInButton mode="modal">
+            <button className='border border-[#FF5A1F] text-black px-5 py-2 sm:px-7 sm:py-2 rounded-full text-xs sm:text-sm cursor-pointer hidden sm:block'>
+              Sign In
+            </button>
+          </SignInButton>
+        </Show>
 
-         <img onClick={() => setVisible(true)} src={assets.menu_icon} className='w-5 cursor-pointer sm:hidden' alt="" />
+        <Show when="signed-in">
+          <div className='hidden sm:block'>
+            <UserButton afterSignOutUrl='/' />
+          </div>
+        </Show>
 
+        <img
+          onClick={() => setVisible(true)}
+          src={assets.menu_icon}
+          className='w-5 cursor-pointer sm:hidden'
+          alt=""
+        />
       </div>
 
-        {/* mobile sidebar menu */}
+      {/* mobile sidebar menu */}
       <div
         className={`fixed inset-0 z-50 overflow-hidden bg-white transition-all sm:hidden ${
           visible ? 'w-full' : 'w-0'
@@ -66,7 +148,7 @@ const Navbar = () => {
 
           <NavLink
             onClick={() => setVisible(false)}
-            className='py-2 pl-6 '
+            className='py-2 pl-6'
             to='/'
           >
             Home
@@ -74,7 +156,7 @@ const Navbar = () => {
 
           <NavLink
             onClick={() => setVisible(false)}
-            className='py-2 pl-6 '
+            className='py-2 pl-6'
             to='/menu'
           >
             Menu
@@ -82,7 +164,7 @@ const Navbar = () => {
 
           <NavLink
             onClick={() => setVisible(false)}
-            className='py-2 pl-6 '
+            className='py-2 pl-6'
             to='/cart'
           >
             Cart
@@ -90,19 +172,37 @@ const Navbar = () => {
 
           <NavLink
             onClick={() => setVisible(false)}
-            className='py-2 pl-6 '
+            className='py-2 pl-6'
             to='/contact'
           >
             Contact Us
           </NavLink>
 
-          <button className='m-4 border border-[#FF5A1F] text-black px-5 py-2 rounded-full text-sm cursor-pointer'>
-            sign in
-          </button>
+          {orderItems.length > 0 && (
+            <NavLink
+              onClick={() => setVisible(false)}
+              className='py-2 pl-6'
+              to='/order'
+            >
+              My Orders
+            </NavLink>
+          )}
+
+          <Show when="signed-out">
+            <SignInButton mode="modal">
+              <button className='m-4 border border-[#FF5A1F] text-black px-5 py-2 rounded-full text-sm cursor-pointer'>
+                Sign In
+              </button>
+            </SignInButton>
+          </Show>
+
+          <Show when="signed-in">
+            <div className='m-4'>
+              <UserButton afterSignOutUrl='/' />
+            </div>
+          </Show>
         </div>
-
       </div>
-
     </div>
   )
 }

@@ -61,6 +61,8 @@ import logout_icon from './logout_icon.png'
 import parcel_icon from './parcel_icon.png'
 import menu_icon from './menu_icon.png'
 import dropdown_icon from './dropdown_icon.png'
+import bin_icon from './bin_icon.png'
+import stripe_logo from './stripe_logo.png'
 
 export const assets = {
     logo,
@@ -84,7 +86,10 @@ export const assets = {
     parcel_icon,
     menu_icon,
     dropdown_icon,
-    food_2
+    bin_icon,
+    food_2,
+    bag_icon,
+    stripe_logo
 
 }
 
