@@ -1,17 +1,20 @@
-import React from "react";
+import React, { useContext } from "react";
 import Title from "./Title";
-import { food_list } from "../assets/assets";
+import { foodContext } from "../Context/foodContext";
 import { assets } from "../assets/assets";
 import { FoodItem } from "./FoodItem";
 
 export const TopDishes = () => {
+
+  const { foodItems } = useContext(foodContext);
+
   return (
     <div>
       <div className="mt-9">
         <Title text={"Top dishes near you"} />
       </div>
       <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5 gap-y-5 md:gap-y-6">
-        {food_list.slice(0, 8).map((item, index) => (
+        {foodItems.slice(0, 8).map((item, index) => (
           <FoodItem
             key={index}
             item={item}

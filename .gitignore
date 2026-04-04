@@ -1,0 +1,14 @@
+# =========================
+# NODE MODULES
+# =========================
+node_modules/
+Admin/node_modules/
+Backend/node_modules/
+
+# =========================
+# ENV FILES
+# =========================
+.env
+Admin/.env
+Backend/.env
+Frontend/.env

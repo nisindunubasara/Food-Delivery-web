@@ -40,7 +40,7 @@ export const FoodItem = ({ item }) => {
   };
 
   return (
-    <div className="cursor-pointer rounded-lg shadow-md transition-shadow duration-300 hover:shadow-lg">
+    <div className=" rounded-lg shadow-md transition-shadow duration-300 hover:shadow-lg">
       <div className="relative">
         <img src={item.image} alt={item.name} className="w-full rounded-t-lg" />
 

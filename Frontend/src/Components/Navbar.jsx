@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { assets } from '../assets/assets'
 import { foodContext } from '../Context/foodContext'
 import { Show, SignInButton, UserButton, useUser } from "@clerk/react";
@@ -7,10 +7,28 @@ import { Show, SignInButton, UserButton, useUser } from "@clerk/react";
 const Navbar = () => {
   const { cartItems, orderItems } = useContext(foodContext)
   const { isSignedIn } = useUser()
+  const navigate = useNavigate()
   const [visible, setVisible] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [searchText, setSearchText] = useState('')
   const searchRef = useRef(null)
   const searchInputRef = useRef(null)
+
+  const handleSearchKeyDown = (event) => {
+    if (event.key !== 'Enter') return
+
+    const trimmedSearch = searchText.trim()
+    const query = new URLSearchParams()
+
+    if (trimmedSearch) {
+      query.set('search', trimmedSearch)
+    }
+
+    navigate(`/menu${query.toString() ? `?${query.toString()}` : ''}`, {
+      state: { searchText: trimmedSearch },
+    })
+    setSearchOpen(false)
+  }
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
@@ -93,6 +111,9 @@ const Navbar = () => {
               ref={searchInputRef}
               type='text'
               placeholder='Search'
+              value={searchText}
+              onChange={(event) => setSearchText(event.target.value)}
+              onKeyDown={handleSearchKeyDown}
               className='absolute right-0 top-1/2 h-9 w-56 -translate-y-1/2 rounded-full border border-gray-200 bg-white px-4 text-sm text-gray-700 shadow-sm outline-none placeholder:text-gray-400 focus:border-[#FF5A1F]'
             />
           )}

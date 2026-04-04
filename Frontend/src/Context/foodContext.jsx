@@ -1,10 +1,13 @@
 import React, { createContext, useEffect, useMemo, useState } from "react";
-import { food_list, menu_list } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 export const foodContext = createContext();
 
 const FoodContextProvider = ({ children }) => {
+
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const currency = "$";
   const delivery_fee = 2;
   const navigate = useNavigate();
@@ -15,13 +18,39 @@ const FoodContextProvider = ({ children }) => {
   const [orderItems, setOrderItems] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
 
+  const fetchFoods = async () => {
+    try {
+      const response = await axios.get(backendUrl + '/api/food/getall');
+      if (response.data.success) {
+        setFoodItems(response.data.foodList);
+      }else{
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  }
+
+  const fetchMenus = async () => {
+    try {
+      const response = await axios.get(backendUrl + '/api/menu/getAll');
+      if (response.data.success) {
+        setMenuList(response.data.menuList);
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  }
+
   useEffect(() => {
-    setFoodItems(food_list);
-    setMenuList(menu_list);
+    fetchFoods();
+    fetchMenus();
   }, []);
 
   const categories = useMemo(() => {
-    const uniqueCategories = [...new Set(menuList.map((item) => item.menu_name))];
+    const uniqueCategories = [...new Set(menuList.map((item) => item.name || item.menu_name).filter(Boolean))];
     return ["All", ...uniqueCategories];
   }, [menuList]);
 

@@ -10,11 +10,14 @@ import Payment from './Pages/Payment'
 import Order from './Pages/Order'
 import Navbar from './Components/Navbar'
 import Footer from './Components/Footer'
+import { ToastContainer, toast } from 'react-toastify';
+
 
 const App = () => {
   return (
     <div>
       <div  className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[8vw]'>
+      <ToastContainer />
       <Navbar />
       <Routes>
         <Route path='/' element={<Home />} />

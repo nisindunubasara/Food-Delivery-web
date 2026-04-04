@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { foodContext } from "../Context/foodContext";
 import { FoodItem } from "../Components/FoodItem";
@@ -22,6 +22,7 @@ const FilterButton = ({ label, selected, onClick }) => {
 
 const Menu = () => {
   const location = useLocation();
+  const [searchText, setSearchText] = useState("");
 
   const {
     categories,
@@ -32,6 +33,8 @@ const Menu = () => {
 
   useEffect(() => {
     const categoryFromNavigation = location.state?.selectedCategory;
+    const stateSearchText = location.state?.searchText;
+    const querySearchText = new URLSearchParams(location.search).get("search") || "";
 
     if (
       categoryFromNavigation &&
@@ -39,7 +42,24 @@ const Menu = () => {
     ) {
       setSelectedCategory(categoryFromNavigation);
     }
+
+    if (typeof stateSearchText === "string") {
+      setSearchText(stateSearchText);
+      return;
+    }
+
+    setSearchText(querySearchText);
   }, [location.state, categories, setSelectedCategory]);
+
+  const visibleFoodItems = useMemo(() => {
+    const normalizedSearch = searchText.trim().toLowerCase();
+
+    if (!normalizedSearch) return filteredFoodItems;
+
+    return filteredFoodItems.filter((item) =>
+      item.name.toLowerCase().includes(normalizedSearch)
+    );
+  }, [filteredFoodItems, searchText]);
 
   return (
     <div>
@@ -57,7 +77,7 @@ const Menu = () => {
       </div>
 
       <div className="mt-5 grid grid-cols-1 gap-4 gap-y-5 sm:grid-cols-2 md:grid-cols-3 md:gap-5 md:gap-y-6 lg:grid-cols-4">
-        {filteredFoodItems.map((item) => (
+        {visibleFoodItems.map((item) => (
           <FoodItem key={item._id} item={item} />
         ))}
       </div>
