@@ -5,11 +5,6 @@ import { assets } from "../assets/assets";
 import QuantityControl from "../Components/QuantityControl";
 import CartTotal from "../Components/CartTotal";
 
-const isSameCartItem = (leftItem, rightItem) =>
-  leftItem._id && rightItem._id
-    ? leftItem._id === rightItem._id
-    : leftItem.name === rightItem.name;
-
 const CartItemRow = ({ item, currency, onRemove, onIncrement, onDecrement }) => {
   return (
     <div className="grid grid-cols-[72px_1fr_auto] items-center gap-3 rounded-xl border border-gray-100 p-3 sm:gap-4 sm:p-4">
@@ -51,34 +46,18 @@ const CartItemRow = ({ item, currency, onRemove, onIncrement, onDecrement }) => 
 };
 
 const Cart = () => {
-  const { cartItems, currency, setCartItems, navigate } = useContext(foodContext);
+  const { cartItems, currency, removeCartItem, updateCartItem, navigate } = useContext(foodContext);
 
-  const handleRemoveItem = (itemToRemove) => {
-    setCartItems((prevCartItems) =>
-      prevCartItems.filter((cartItem) => !isSameCartItem(cartItem, itemToRemove)),
-    );
+  const handleRemoveItem = async (itemToRemove) => {
+    await removeCartItem(itemToRemove.foodId || itemToRemove._id);
   };
 
-  const handleIncrementItem = (itemToUpdate) => {
-    setCartItems((prevCartItems) =>
-      prevCartItems.map((cartItem) =>
-        isSameCartItem(cartItem, itemToUpdate)
-          ? { ...cartItem, quantity: cartItem.quantity + 1 }
-          : cartItem,
-      ),
-    );
+  const handleIncrementItem = async (itemToUpdate) => {
+    await updateCartItem(itemToUpdate.foodId || itemToUpdate._id, Number(itemToUpdate.quantity) + 1);
   };
 
-  const handleDecrementItem = (itemToUpdate) => {
-    setCartItems((prevCartItems) =>
-      prevCartItems
-        .map((cartItem) =>
-          isSameCartItem(cartItem, itemToUpdate)
-            ? { ...cartItem, quantity: cartItem.quantity - 1 }
-            : cartItem,
-        )
-        .filter((cartItem) => cartItem.quantity > 0),
-    );
+  const handleDecrementItem = async (itemToUpdate) => {
+    await updateCartItem(itemToUpdate.foodId || itemToUpdate._id, Number(itemToUpdate.quantity) - 1);
   };
 
   return (
@@ -96,7 +75,7 @@ const Cart = () => {
           <div className="space-y-3 sm:space-y-4">
             {cartItems.map((item) => (
               <CartItemRow
-                key={item._id || item.name}
+                key={item.foodId || item._id || item.name}
                 item={item}
                 currency={currency}
                 onRemove={() => handleRemoveItem(item)}

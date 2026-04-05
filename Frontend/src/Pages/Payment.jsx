@@ -5,12 +5,12 @@ import CartTotal from '../Components/CartTotal';
 import { useState } from 'react';
 import { foodContext } from '../Context/foodContext';
 import { useContext } from 'react';
+import { toast } from 'react-toastify';
 
 const Payment = () => {
 
   const [method, setMethod] = useState("cod");
-  const [paymentStatus, setPaymentStatus] = useState(false);
-  const { cartItems, setCartItems, setOrderItems, delivery_fee, navigate } = useContext(foodContext);
+  const { cartItems, removeCartItem, createOrder, delivery_fee, navigate } = useContext(foodContext);
 
   const paymentMethods = [
     {
@@ -58,39 +58,42 @@ const Payment = () => {
     return false;
   };
 
-  const createOrderObject = (customerData, items, paymentMethod) => {
-  const paymentStatus = getPaymentStatusByMethod(paymentMethod);
-
-  const copiedItems = items.map((item) => ({
-    ...item,
-    image: Array.isArray(item.image) ? [...item.image] : item.image,
-  }));
-
-  const totalAmount = copiedItems.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0
-  ) + delivery_fee;
-
-  return {
-    customer: { ...customerData },
-    orderedItems: copiedItems,
-    paymentMethod,
-    paymentStatus,
-    totalAmount,
-    createdDate: new Date().toISOString(),
-  };
-};
-
-  const handlePlaceOrder = (event) => {
+  const handlePlaceOrder = async (event) => {
     event.preventDefault();
 
-    const order = createOrderObject({ ...formData }, [...cartItems], method);
-    setPaymentStatus(order.paymentStatus);
-    setOrderItems((prevOrderItems) => [...prevOrderItems, order]);
+    if (!cartItems || cartItems.length === 0) {
+      toast.error("Your cart is empty");
+      return;
+    }
 
+    const paymentStatus = getPaymentStatusByMethod(method) ? "Paid" : "Pending";
+
+    const result = await createOrder({
+      customerDeliveryInfo: {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        street: formData.street,
+        city: formData.city,
+        state: formData.state,
+        postalCode: formData.zipcode,
+        country: formData.country,
+      },
+      orderedItems: cartItems,
+      paymentMethod: method,
+      paymentStatus,
+      totalAmount: getTotalAmount(),
+    });
+
+    if (!result.success) return;
+
+    await Promise.all(
+      cartItems.map((item) => removeCartItem(item.foodId || item._id))
+    );
+
+    toast.success("Order placed successfully");
     navigate("/order");
-    // Optional: clear the cart after successful order placement.
-    setCartItems([]);
   };
 
   return (

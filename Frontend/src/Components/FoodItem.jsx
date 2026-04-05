@@ -4,7 +4,7 @@ import { foodContext } from "../Context/foodContext";
 import QuantityControl from "./QuantityControl";
 
 export const FoodItem = ({ item }) => {
-  const { setCartItems } = useContext(foodContext);
+  const { addCartItem } = useContext(foodContext);
   const [quantity, setQuantity] = useState(0);
 
   const handleFirstAdd = () => {
@@ -19,23 +19,8 @@ export const FoodItem = ({ item }) => {
     setQuantity((prev) => Math.max(0, prev - 1));
   };
 
-  const handleCartClick = () => {
-    setCartItems((prevCartItems) => {
-      const existingItemIndex = prevCartItems.findIndex(
-        (cartItem) => cartItem._id === item._id
-      );
-
-      const updatedItem = { ...item, quantity };
-
-      if (existingItemIndex === -1) {
-        return [...prevCartItems, updatedItem]; 
-      }
-
-      return prevCartItems.map((cartItem, index) =>
-        index === existingItemIndex ? updatedItem : cartItem
-      );
-    });
-
+  const handleCartClick = async () => {
+    await addCartItem(item, quantity);
     setQuantity(0);
   };
 
